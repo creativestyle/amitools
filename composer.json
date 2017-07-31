@@ -1,0 +1,19 @@
+{
+    "name": "creativestyle/amitools",
+    "description": "Simplified functions to handle AMI images",
+    "type": "project",
+    "require": {
+        "aws/aws-sdk-php": "^3.32",
+        "symfony/console": "^3.3"
+    },
+    "autoload": {
+        "psr-4": {"creativestyle\\amitools\\": "src/"}
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Krzysztof Daniel",
+            "email": "krzysztof.daniel@creativestyle.pl"
+        }
+    ]
+}
