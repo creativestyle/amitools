@@ -21,10 +21,10 @@ class RemoveOldAMIsCommand extends Command
     {
         $this->setName('ami:remove')->setDescription('Removes old AMIs');
         $this->addArgument('name', InputArgument::REQUIRED, 'Value of the name tag');
-        $this->addArgument('lc', InputArgument::REQUIRED, 'Prefix of the Launch Configuration');
         $this->addArgument('leave', InputArgument::REQUIRED, 'Number of images to leave');
         $this->addOption('profile', null, InputArgument::OPTIONAL, 'AWS profile, defaults to AWS_PROFILE environment variable');
         $this->addOption('limit', null, InputArgument::OPTIONAL, 'Maxium number of images to remove', 5);
+        $this->addOption('protectId', null, InputArgument::OPTIONAL, 'Do not delete this Image ID. Combine this with reading Autoscaling Connfiguration');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -33,6 +33,7 @@ class RemoveOldAMIsCommand extends Command
         $tag = $input->getArgument('name');
         $leave = $input->getArgument('leave');
         $limit = $input->getOption('limit');
+        $protectId = $input->getOption('protectId');
         $client = new \Aws\Ec2\Ec2Client([
             'version' => 'latest',
             'profile'=>$profile,
@@ -58,11 +59,14 @@ class RemoveOldAMIsCommand extends Command
 
         $removeAmis = array_slice($oldestImages, 0, $howManyRemove);
 
-
         if(count($removeAmis)) {
             $killer = new Killer($client);
             foreach ($removeAmis as $ami) {
                 $amiId = $ami['ImageId'];
+                if($protectId == $amiId) {
+                    $output -> writeln("$amiId is protected, skipping");
+                    continue;
+                }
                 $output -> writeln("Removing $amiId");
                 $killer->removeImage($amiId);
             }
